@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!--
-  KERFsuite™ — Kernel-Aided Design Suite
-  Copyright (C) 2024-2025 KERFsuite / withshalom
+  KADsuite™ — Kernel-Aided Design Suite
+  Copyright (C) 2024-2025 KADsuite / withshalom
 
   This program is free software: you can redistribute it and/or modify
   it under the terms of the GNU Affero General Public License as published
@@ -17,11 +17,24 @@
   along with this program. If not, see <https://www.gnu.org/licenses/>.
 
   SPDX-License-Identifier: AGPL-3.0-or-later
-  Commercial use requires a separate license — see KERFsuite for details: https://withshalom.github.io
+  KADsuite™, KAD™, KAM™, KUBE™, KARVE™, KONSTRUCT™, KULTIVATE™,
+  KODE™, and KANVAS™ are trademarks of withshalom / KADsuite.
+  Trademark rights are independent of and not transferred by this
+  AGPL-3.0 license. Forks and derivative works may not use these
+  marks or any confusingly similar names without express written
+  permission. The AGPL license governs this source code only.
+
+  Forks must remain open source under AGPL — KADsuite™ trademarks
+  and branding are not licensed and may not be used in any fork or
+  derivative work without separate written permission.
+
+  KADsuite™ trademarks are not covered by the AGPL-3.0 license.
+  Native builds are separate proprietary products.
 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="copyright" content="Copyright (C) 2024-2025 KADsuite / withshalom. Licensed under AGPL-3.0-or-later. KADsuite™, KAD™, KAM™, KUBE™, KARVE™, KONSTRUCT™, KULTIVATE™, KODE™, and KANVAS™ are trademarks of withshalom / KADsuite. Forks must remain open source under AGPL. Trademarks not licensed by AGPL.">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>KULTIVATE — Kernel-Unified Landscape Technology Innovation Vegetation Architecture Terraform Environment</title>
 <style>
@@ -718,7 +731,7 @@ html, body {
   <div class="sb-item"><span>OBJECTS</span><span class="sbv" id="sb-objs">0</span></div>
   <div class="sb-item"><span>ZOOM</span><span class="sbv" id="sb-zoom">100%</span></div>
   <div class="sb-right">
-    <span style="font-size:8.5px; color:var(--t3); letter-spacing:0.1em;">KULTIVATE v1.0 · Site-Keyed Arrangement &amp; Planting Environment</span>
+    <span style="font-size:8.5px; color:var(--t3); letter-spacing:0.1em;">KULTIVATE v0.0 · Site-Keyed Arrangement &amp; Planting Environment</span>
   </div>
 </div>
 
@@ -2101,7 +2114,7 @@ function newDoc(){
 }
 
 function saveDoc(){
-  const doc={version:'1.0',source:'KULTIVATE',objects:Scene.objects,nextId:Scene.nextId};
+  const doc={version:'0.0',source:'KULTIVATE',objects:Scene.objects,nextId:Scene.nextId};
   const blob=new Blob([JSON.stringify(doc,null,2)],{type:'application/json'});
   const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(blob),download:'site.klt'});
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
@@ -2368,7 +2381,7 @@ function exportSVG() {
 }
 
 // ── KANVAS ──────────────────────────────────────────────────────────────────
-// Converts KULTIVATE scene into a .knv JSON compatible with KANVAS v1.0.
+// Converts KULTIVATE scene into a .knv JSON compatible with KANVAS v0.0.
 // Zones → shape objects (rect approximation via bounding box) and
 // polyline outlines as bezier strokes. Trees/shrubs → ellipse shapes.
 // Dims → stroke paths. Notes → text objects. Layers mapped to KANVAS layers.
@@ -2459,12 +2472,12 @@ function exportKANVAS() {
   }
 
   const knv = {
-    version:'1.0', source:'KULTIVATE→KANVAS',
+    version:'0.0', source:'KULTIVATE→KANVAS',
     layers: KANVAS_LAYERS,
     activeLayer: 'Site Boundary',
     nextId, strokes,
     page:'a3l',  // A3 Landscape suits a site plan
-    kultivateSource: { version:'1.0', objects: Scene.objects },
+    kultivateSource: { version:'0.0', objects: Scene.objects },
   };
   dlText(JSON.stringify(knv, null, 2), 'site-plan.knv', 'application/json');
   showToast(`Exported site-plan.knv · ${strokes.length} KANVAS objects`);
@@ -2516,7 +2529,7 @@ function exportKAD() {
   }
 
   const kad = {
-    version:'1.0', source:'KULTIVATE→KAD',
+    version:'0.0', source:'KULTIVATE→KAD',
     unitMode:'m',
     layers: [
       {name:'KULTIVATE-Boundary',color:'#c8a96e',visible:true,locked:false},
@@ -2531,7 +2544,7 @@ function exportKAD() {
     ],
     activeLayer:'KULTIVATE-Boundary',
     nextId, objects,
-    kultivateSource:{ version:'1.0', objects:Scene.objects },
+    kultivateSource:{ version:'0.0', objects:Scene.objects },
   };
   dlText(JSON.stringify(kad, null, 2), 'site-plan.kad', 'application/json');
   showToast(`Exported site-plan.kad · ${objects.length} KAD objects`);
@@ -2752,7 +2765,7 @@ try{
 }catch(e){ console.error('KULTIVATE init:',e); }
 
 setTimeout(()=>{
-  showToast('KULTIVATE v1.0 · B=Boundary H=Hardscape P=Planting T=Tree S=Shrub G=Groundcover D=Dim · F=Fit');
+  showToast('KULTIVATE v0.0 · B=Boundary H=Hardscape P=Planting T=Tree S=Shrub G=Groundcover D=Dim · F=Fit');
 },600);
 </script>
 <div id="ctx-menu"></div>

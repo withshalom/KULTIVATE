@@ -113,9 +113,11 @@ html, body {
 .brand-col { line-height:1; }
 .brand-name {
   font-family:var(--fd); font-weight:800; font-size:16px;
-  letter-spacing:-0.02em;
+  letter-spacing:0.01em;
   background:linear-gradient(90deg, var(--accent2), var(--accent), #c8a060);
-  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent;
+  background-clip:text;
+  padding-right:2px; /* prevent last letter clipping */
 }
 .brand-sub {
   font-family:var(--fm); font-size:7px; color:var(--t3);
@@ -270,7 +272,7 @@ html, body {
 /* ── CANVAS ── */
 #canvas-wrap {
   position:relative; overflow:hidden;
-  background:var(--void); cursor:crosshair;
+  background:#f8f3ea; cursor:crosshair;
 }
 #main-canvas { display:block; position:absolute; top:0; left:0; }
 
@@ -512,6 +514,9 @@ html, body {
     </button>
     <button class="tbb" id="btn-snap" onclick="toggleSnap()">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>Snap
+    </button>
+    <button class="tbb" id="btn-labels" onclick="toggleLabels()" title="Toggle plant labels (L)" style="color:var(--accent);">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>Labels
     </button>
   </div>
   <div class="tb-right">
@@ -827,13 +832,14 @@ const PLANT_LIB = [
 
 // Category display config
 const CAT_CFG = {
-  boundary:    { label:'Site Boundary',  color:'var(--col-boundary)',  fill:'rgba(200,169,110,0.05)', dash:[6,3] },
-  hardscape:   { label:'Hardscape',      color:'var(--col-hardscape)', fill:'rgba(176,149,109,0.15)', dash:[] },
-  planting:    { label:'Planting Region',color:'var(--col-planting)',  fill:'rgba(143,168,82,0.12)',  dash:[3,2] },
-  tree:        { label:'Tree',           color:'var(--col-tree)',      fill:'rgba(90,138,60,0.18)',   dash:[] },
-  shrub:       { label:'Shrub',          color:'var(--col-shrub)',     fill:'rgba(123,191,140,0.20)', dash:[] },
-  groundcover: { label:'Groundcover',    color:'var(--col-ground)',    fill:'rgba(165,201,110,0.18)', dash:[1,2] },
-  water:       { label:'Water Feature',  color:'var(--col-water)',     fill:'rgba(95,168,200,0.22)',  dash:[] },
+  // Dark colors hardcoded — no CSS var so canvas always resolves correctly
+  boundary:    { label:'Site Boundary',  color:'#1a0d04', fill:'rgba(60,35,10,0.06)',   dash:[8,4] },
+  hardscape:   { label:'Hardscape',      color:'#3d2510', fill:'rgba(100,70,30,0.15)',  dash:[] },
+  planting:    { label:'Planting Region',color:'#1a4010', fill:'rgba(50,100,20,0.14)',  dash:[4,3] },
+  tree:        { label:'Tree',           color:'#0f3008', fill:'rgba(30,80,15,0.16)',   dash:[] },
+  shrub:       { label:'Shrub',          color:'#1a4820', fill:'rgba(40,110,40,0.16)',  dash:[] },
+  groundcover: { label:'Groundcover',    color:'#2a5010', fill:'rgba(70,130,20,0.14)',  dash:[2,3] },
+  water:       { label:'Water Feature',  color:'#0a3050', fill:'rgba(15,80,130,0.18)',  dash:[] },
 };
 
 // ════════════════════════════════════════════════════════════════════════
@@ -909,6 +915,8 @@ function toggleUnits(){
 }
 function toggleLabels(){
   showLabels=!showLabels;
+  const lb = document.getElementById('btn-labels');
+  if(lb) lb.style.color = showLabels ? 'var(--accent)' : 'var(--t2)';
   scheduleDraw();
   showToast('Labels: '+(showLabels?'ON':'OFF'));
 }
@@ -1053,7 +1061,7 @@ let tool        = 'select';
 let activePlant = PLANT_LIB[0];
 let polyPts     = [];  // in-progress polygon points (world coords)
 let dimState    = { active:false, p1:null };
-let mouseW      = { x:0, y:0 };
+let mouseW      = null; // set on first move
 let selectedId  = null;
 let hoverId     = null;
 
@@ -1074,11 +1082,12 @@ function scheduleDraw() {
 function draw() {
   const W = canvas.width, H = canvas.height;
   if(W<2||H<2) return;
+  try {
   ctx.clearRect(0,0,W,H);
 
   // Background grain / vignette
     // Parchment canvas
-  ctx.fillStyle = '#e8dfc8'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = '#f8f3ea'; ctx.fillRect(0,0,W,H);
   var vg=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.35,W/2,H/2,Math.max(W,H)*0.72);
   vg.addColorStop(0,'rgba(0,0,0,0)');
   vg.addColorStop(1,'rgba(30,18,4,0.08)');
@@ -1097,6 +1106,7 @@ function draw() {
   // Dim preview
   if (tool==='dim' && dimState.active && dimState.p1) drawDimPreview();
 
+  } catch(e) { console.error('draw() error:', e); }
   updateUI();
 }
 
@@ -1109,7 +1119,7 @@ function drawGrid(W,H) {
 
   ctx.save();
   // Minor grid
-  ctx.strokeStyle = 'rgba(60,100,30,0.16)'
+  ctx.strokeStyle = 'rgba(100,75,30,0.22)'
   ctx.lineWidth = 0.5;
   for (let x=x0; x<=x1; x+=GRID) {
     const s=w2s(x,0); ctx.beginPath(); ctx.moveTo(s.x,0); ctx.lineTo(s.x,W); ctx.stroke();
@@ -1118,7 +1128,7 @@ function drawGrid(W,H) {
     const s=w2s(0,y); ctx.beginPath(); ctx.moveTo(0,s.y); ctx.lineTo(W,s.y); ctx.stroke();
   }
   // Major grid every 5m
-  ctx.strokeStyle = 'rgba(60,100,30,0.32)'
+  ctx.strokeStyle = 'rgba(100,75,30,0.45)'
   ctx.lineWidth = 1;
   for (let x=Math.floor(x0/5)*5; x<=x1; x+=5) {
     const s=w2s(x,0); ctx.beginPath(); ctx.moveTo(s.x,0); ctx.lineTo(s.x,W); ctx.stroke();
@@ -1143,7 +1153,7 @@ function drawFruit(obj, selected, hovered) {
 
   if(sym==='fruit-palm') {
     // Palm-style fruit tree (banana, coconut)
-    ctx.strokeStyle=col; ctx.lineWidth=selected?1.8:1.3; ctx.setLineDash([]);
+    ctx.strokeStyle=col; ctx.lineWidth=selected?2.5:2.0; ctx.setLineDash([]);
     ctx.fillStyle=col+'18';
     ctx.beginPath(); ctx.arc(s.x,s.y,r*0.14,0,Math.PI*2); ctx.fill(); ctx.stroke();
     for(var i=0;i<7;i++){
@@ -1156,7 +1166,7 @@ function drawFruit(obj, selected, hovered) {
   } else if(sym==='fruit-cit') {
     // Citrus — dense round canopy
     ctx.fillStyle=col+'25'; ctx.beginPath(); ctx.arc(s.x,s.y,r,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle=col; ctx.lineWidth=selected?1.8:1.3;
+    ctx.strokeStyle=col; ctx.lineWidth=selected?2.5:2.0;
     drawSketchCircle(s.x,s.y,r,18);
     ctx.globalAlpha*=0.5;
     drawSketchCircle(s.x,s.y,r*0.6,12);
@@ -1164,7 +1174,7 @@ function drawFruit(obj, selected, hovered) {
   } else if(sym==='fruit-trop') {
     // Tropical — wide spreading canopy
     ctx.fillStyle=col+'20'; ctx.beginPath(); ctx.arc(s.x,s.y,r,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle=col; ctx.lineWidth=selected?1.8:1.3;
+    ctx.strokeStyle=col; ctx.lineWidth=selected?2.5:2.0;
     drawSketchCircle(s.x,s.y,r,20);
     for(var i=0;i<6;i++){
       var a=(i/6)*Math.PI*2;
@@ -1174,7 +1184,7 @@ function drawFruit(obj, selected, hovered) {
     // fruit-dec — deciduous fruit tree (apple, pear, cherry…)
     ctx.setLineDash([]);
     ctx.fillStyle=col+'22'; ctx.beginPath(); ctx.arc(s.x,s.y,r,0,Math.PI*2); ctx.fill();
-    ctx.strokeStyle=col; ctx.lineWidth=selected?1.8:1.3;
+    ctx.strokeStyle=col; ctx.lineWidth=selected?2.5:2.0;
     drawSketchCircle(s.x,s.y,r,16);
     ctx.globalAlpha*=0.4; drawSketchCircle(s.x,s.y,r*0.58,10); ctx.globalAlpha=hovered?0.85:1;
   }
@@ -1214,7 +1224,7 @@ function drawCrop(obj, selected, hovered) {
 
   ctx.save();
   ctx.globalAlpha=hovered?0.85:1;
-  ctx.strokeStyle=col; ctx.lineWidth=selected?1.5:1.1; ctx.setLineDash([]);
+  ctx.strokeStyle=col; ctx.lineWidth=selected?2.5:2.0; ctx.setLineDash([]);
 
   if(sym==='crop-stake'){
     // Stake/cage plant — central stake, foliage cluster, small fruit dots
@@ -1335,15 +1345,16 @@ function drawZone(obj, selected, hovered) {
   // Fill
   ctx.fillStyle = resolveColor(cfg.fill);
   if (selected || hovered) {
-    ctx.fillStyle = col.replace(')',',0.22)').replace('rgb(','rgba(').replace('#','');
-    // simpler approach:
-    ctx.globalAlpha = hovered ? 0.85 : 1.0;
+    ctx.globalAlpha = hovered ? 0.6 : 0.45;
+  } else {
+    ctx.globalAlpha = 1.0;
   }
   ctx.fill();
+  ctx.globalAlpha = 1.0;
 
   // Stroke
   ctx.strokeStyle = col;
-  ctx.lineWidth = selected ? 2 : 1.6;
+  ctx.lineWidth = selected ? 3.5 : 2.8;
   if (cfg.dash.length) ctx.setLineDash(cfg.dash);
   else ctx.setLineDash([]);
   ctx.stroke();
@@ -1375,8 +1386,8 @@ function drawZone(obj, selected, hovered) {
     for (const pt of obj.pts) {
       const s = w2s(pt.x,pt.y);
       ctx.beginPath(); ctx.arc(s.x,s.y,4,0,Math.PI*2);
-      ctx.fillStyle = 'var(--t1)'; ctx.globalAlpha=1;
-      ctx.fillStyle = '#e8dfc8'; ctx.fill();
+      ctx.fillStyle = '#f5f0e8'; ctx.globalAlpha=1;
+      ctx.fill();
       ctx.strokeStyle = col; ctx.lineWidth=1.5; ctx.setLineDash([]); ctx.stroke();
     }
   }
@@ -1597,26 +1608,29 @@ function drawPolyPreview() {
   const col = resolveColor(cfg.color);
 
   ctx.save();
-  ctx.strokeStyle=col; ctx.lineWidth=1.5; ctx.setLineDash([4,3]);
+  ctx.strokeStyle=col; ctx.lineWidth=2.5; ctx.setLineDash([6,3]);
+  ctx.globalAlpha=1;
   ctx.beginPath();
   const p0=w2s(polyPts[0].x,polyPts[0].y); ctx.moveTo(p0.x,p0.y);
   for(let i=1;i<polyPts.length;i++){const p=w2s(polyPts[i].x,polyPts[i].y);ctx.lineTo(p.x,p.y);}
-  // Line to mouse
-  ctx.lineTo(mouseW.x, mouseW.y);
+  // Line to mouse — only if mouse position is known
+  if(mouseW) ctx.lineTo(mouseW.x, mouseW.y);
   ctx.stroke();
   // Close line
-  if(polyPts.length>1){
+  if(polyPts.length>1 && mouseW){
     ctx.setLineDash([2,4]); ctx.globalAlpha=0.4;
     ctx.beginPath(); ctx.moveTo(mouseW.x,mouseW.y); ctx.lineTo(p0.x,p0.y); ctx.stroke();
   }
-  // Anchor dots
+  // Anchor dots — always visible
   ctx.setLineDash([]); ctx.globalAlpha=1;
   for(const pt of polyPts){
-    const s=w2s(pt.x,pt.y);
-    ctx.fillStyle=col; ctx.beginPath(); ctx.arc(s.x,s.y,3.5,0,Math.PI*2); ctx.fill();
+    const sp=w2s(pt.x,pt.y);
+    ctx.fillStyle='#fff';  ctx.beginPath(); ctx.arc(sp.x,sp.y,7,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle=col;     ctx.beginPath(); ctx.arc(sp.x,sp.y,5,0,Math.PI*2); ctx.fill();
+    ctx.strokeStyle='#fff'; ctx.lineWidth=1; ctx.beginPath(); ctx.arc(sp.x,sp.y,5,0,Math.PI*2); ctx.stroke();
   }
   // Live segment length
-  if(polyPts.length>0&&mouseW){
+  if(polyPts.length>0 && mouseW && mouseW.x!==undefined){
     var last2=polyPts[polyPts.length-1],mw2=s2w(mouseW.x,mouseW.y);
     var d2=Math.hypot(mw2.x-last2.x,mw2.y-last2.y);
     if(d2>0.05){
@@ -1664,11 +1678,11 @@ function drawDimPreview() {
 //  HELPERS
 // ════════════════════════════════════════════════════════════════════════
 function resolveColor(v) {
-  if (!v) return '#c8a96e';
-  // Handle CSS var()
+  if (!v) return '#3a2008';
   if (v.startsWith('var(--')) {
-    const name=v.slice(6,-1);
-    return getComputedStyle(document.documentElement).getPropertyValue('--'+name.slice(2)).trim()||'#c8a96e';
+    const name = v.slice(6,-1); // e.g. 'col-boundary'
+    const val = getComputedStyle(document.documentElement).getPropertyValue('--'+name).trim();
+    return val || '#3a2008';
   }
   return v;
 }
@@ -1794,6 +1808,14 @@ function onDown(e) {
 
   // Zone tools
   if (TOOL_CAT[tool]) {
+    // Update mouseW so preview renders immediately after tap
+    mouseW = w2s(w.x, w.y);
+    // If tapping near first point (within 2m) and have 3+ pts — close polygon
+    if (polyPts.length >= 3) {
+      const first = polyPts[0];
+      const dist  = Math.hypot(w.x - first.x, w.y - first.y);
+      if (dist < 2.5) { commitPolygon(); return; }
+    }
     polyPts.push({...w});
     scheduleDraw(); return;
   }

@@ -42,19 +42,20 @@
 
 :root {
   /* ── KULTIVATE: verdant — deep forest canopy + botanical paper ── */
-  --void:      #0e1e0c;  /* deep forest shadow */
-  --panel:     #162010;
-  --panel2:    #1e2e18;
-  --hover:     #263820;
-  --border:    rgba(106,184,48,0.18);
-  --border-hi: rgba(106,184,48,0.38);
-  --accent:     #6ab830;  /* fresh growth green */
-  --accent-dim: rgba(106,184,48,0.20);
-  --accent2:    #3a8020;  /* deeper plant green */
-  --accent3:    #a0c050;  /* chartreuse highlight */
-  --canvas-bg:  #e8e4c8;  /* botanical paper */
+  --void:      #c8bc98;  /* parchment shadow */
+  --panel:     #e8dfc8;
+  --panel2:    #dfd6bc;
+  --hover:     #d8cead;
+  --border:    rgba(120,90,40,0.18);
+  --border-hi: rgba(100,70,20,0.38);
+  --accent:     #7a5c28;  /* rich earth brown */
+  --accent-dim: rgba(100,70,20,0.18);
+  --accent-glow: rgba(100,70,20,0.10);
+  --accent2:    #5a3e18;  /* deep earth */
+  --accent3:    #a07840;  /* mid earth */
+  --canvas-bg:  #e8dfc8;  /* botanical parchment */
   /* Category colours — calibrated for botanical paper canvas */
-  --col-boundary: #6a5020;
+  --col-boundary: #2a1a08;
   --col-hardscape:#8a6830;
   --col-planting: #2e7818;
   --col-tree:     #1e5810;
@@ -64,9 +65,9 @@
   --col-note:     #a06018;
   --col-fruit:    #c04818;
   --col-crop:     #889018;
-  --green: #5ab020; --amber: #b08820; --red: #a83820;
+  --green: #7a5c28; --amber: #b08820; --red: #a83820;
   /* Text — light on deep forest panels */
-  --t1: #e8f0d8;  --t2: #8ab068;  --t3: #486838;
+  --t1: #2a1e0a;  --t2: #5a4020;  --t3: #8a6840;
   --fm: 'Fira Code', monospace; --fd: 'Syne', sans-serif;
   --sidebar-w:236px; --rpanel-w:210px; --toolbar-h:42px; --status-h:26px;
 }
@@ -102,7 +103,7 @@ html, body {
 }
 .brand-mark {
   width:30px; height:30px; flex-shrink:0;
-  background:linear-gradient(145deg, #0e1e0c, #2e5818, #6ab830);
+  background:linear-gradient(145deg, #1a140a, #3a2c14, #8a6e3a);
   border-radius:7px;
   display:flex; align-items:center; justify-content:center;
   font-family:var(--fm); font-size:9px; font-weight:600; color:#e0c87a;
@@ -113,7 +114,7 @@ html, body {
 .brand-name {
   font-family:var(--fd); font-weight:800; font-size:16px;
   letter-spacing:-0.02em;
-  background:linear-gradient(90deg, var(--accent2), var(--accent), #4a3010);
+  background:linear-gradient(90deg, var(--accent2), var(--accent), #c8a060);
   -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
 }
 .brand-sub {
@@ -450,6 +451,17 @@ html, body {
   }
   .ctx-item { padding:6px 14px; }
 
+
+/* ── Return to KADsuite — matches KADsuite escape bar button, earth tan ── */
+#btn-return-kadsuite {
+  display:flex; align-items:center; gap:6px; padding:4px 12px;
+  background:none; border:1px solid rgba(122,92,40,0.45); border-radius:3px;
+  color:#7a5c28; font-family:var(--fm,monospace); font-size:9px;
+  letter-spacing:0.14em; text-transform:uppercase; cursor:pointer;
+  transition:all .2s; text-decoration:none; flex-shrink:0; white-space:nowrap;
+  margin-right:4px;
+}
+#btn-return-kadsuite:hover { background:rgba(122,92,40,0.10); border-color:#7a5c28; }
 </style>
 </head>
 <body>
@@ -506,6 +518,9 @@ html, body {
     <div class="tb-badge live" id="badge-scale">1:200</div>
     <div class="tb-badge" id="badge-units" onclick="toggleUnits()" title="Toggle units (M)" style="cursor:pointer">MET</div>
   </div>
+  <div style="flex:1;"></div>
+  <a href="https://kadsuite.com" id="btn-return-kadsuite" title="Return to KADsuite">← Return to KADsuite</a>
+
 </div>
 
 <!-- ══ SIDEBAR LEFT ══ -->
@@ -1063,7 +1078,7 @@ function draw() {
 
   // Background grain / vignette
     // Parchment canvas
-  ctx.fillStyle = '#e8e4c8'; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = '#e8dfc8'; ctx.fillRect(0,0,W,H);
   var vg=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*0.35,W/2,H/2,Math.max(W,H)*0.72);
   vg.addColorStop(0,'rgba(0,0,0,0)');
   vg.addColorStop(1,'rgba(30,18,4,0.08)');
@@ -1901,6 +1916,8 @@ function buildPlantLib() {
   const el=document.getElementById('plant-lib');
   const groups=[
     {cat:'tree',label:'Trees'},
+    {cat:'fruit',label:'Fruit Trees'},
+    {cat:'crop',label:'Crops'},
     {cat:'shrub',label:'Shrubs'},
     {cat:'groundcover',label:'Groundcover'},
   ];
@@ -1953,6 +1970,53 @@ function plantIcon(p,size) {
       <circle cx="${cx-r*0.3}" cy="${cy+r*0.1}" r="${r*0.6}" fill="${col}22" stroke="${col}" stroke-width="1.1"/>
       <circle cx="${cx+r*0.3}" cy="${cy+r*0.1}" r="${r*0.55}" fill="${col}1a" stroke="${col}" stroke-width="1.1"/>
       <circle cx="${cx}" cy="${cy-r*0.25}" r="${r*0.55}" fill="${col}28" stroke="${col}" stroke-width="1.1"/>
+    </svg>`;
+  }
+  if(p.category==='fruit'){
+    const fc=p.fruitColor||col;
+    if(p.symbol==='fruit-palm'){
+      return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" fill="none">
+        <circle cx="${cx}" cy="${cy}" r="2" fill="${col}"/>
+        <line x1="${cx}" y1="${cy}" x2="${cx-r}" y2="${cy-r*0.6}" stroke="${col}" stroke-width="1.1"/>
+        <line x1="${cx}" y1="${cy}" x2="${cx+r}" y2="${cy-r*0.6}" stroke="${col}" stroke-width="1.1"/>
+        <line x1="${cx}" y1="${cy}" x2="${cx}" y2="${cy-r}" stroke="${col}" stroke-width="1.1"/>
+        <circle cx="${cx-r*0.4}" cy="${cy+r*0.4}" r="2.5" fill="${fc}88" stroke="${fc}" stroke-width="0.8"/>
+        <circle cx="${cx+r*0.4}" cy="${cy+r*0.4}" r="2.5" fill="${fc}88" stroke="${fc}" stroke-width="0.8"/>
+      </svg>`;
+    }
+    if(p.symbol==='fruit-cit'){
+      return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" fill="none">
+        <circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}18" stroke="${col}" stroke-width="1.2"/>
+        <circle cx="${cx}" cy="${cy}" r="${r*0.45}" fill="${fc}88" stroke="${fc}" stroke-width="1"/>
+      </svg>`;
+    }
+    // default fruit-dec
+    return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" fill="none">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="${col}18" stroke="${col}" stroke-width="1.2"/>
+      <circle cx="${cx}" cy="${cy}" r="3" fill="${fc}" stroke="${fc}88" stroke-width="0.5"/>
+    </svg>`;
+  }
+  if(p.category==='crop'){
+    if(p.symbol==='crop-stake'||p.symbol==='crop-vine'){
+      return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" fill="none">
+        <line x1="${cx}" y1="${cy+r}" x2="${cx}" y2="${cy-r*0.6}" stroke="${col}" stroke-width="1.2"/>
+        <ellipse cx="${cx}" cy="${cy-r*0.6}" rx="${r*0.7}" ry="${r*0.4}" fill="${col}22" stroke="${col}" stroke-width="1"/>
+      </svg>`;
+    }
+    if(p.symbol==='crop-stalk'){
+      return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" fill="none">
+        <line x1="${cx}" y1="${cy+r}" x2="${cx}" y2="${cy-r}" stroke="${col}" stroke-width="1.5"/>
+        <ellipse cx="${cx}" cy="${cy}" rx="${r*0.6}" ry="${r*0.25}" fill="${col}22" stroke="${col}" stroke-width="0.9" transform="rotate(-30,${cx},${cy})"/>
+      </svg>`;
+    }
+    if(p.symbol==='crop-root'){
+      return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" fill="none">
+        <ellipse cx="${cx}" cy="${cy+r*0.2}" rx="${r*0.65}" ry="${r*0.55}" fill="${col}28" stroke="${col}" stroke-width="1.1"/>
+        <line x1="${cx}" y1="${cy-r*0.3}" x2="${cx}" y2="${cy-r}" stroke="${col}" stroke-width="1.2"/>
+      </svg>`;
+    }
+    return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" fill="none">
+      <ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="${r*0.6}" fill="${col}18" stroke="${col}" stroke-width="1" stroke-dasharray="2,1.5"/>
     </svg>`;
   }
   // groundcover
@@ -2210,7 +2274,7 @@ function exportSVG() {
 
   // CAT_CFG raw colour overrides for SVG (avoid CSS vars)
   const SVG_CAT = {
-    boundary:    { stroke:'#c8a96e', fill:'rgba(200,169,110,0.06)', dasharray:'6,3', lw:1.2 },
+    boundary:    { stroke:'#2a1a08', fill:'rgba(200,169,110,0.06)', dasharray:'6,4', lw:2.2 },
     hardscape:   { stroke:'#b0956d', fill:'rgba(176,149,109,0.22)', dasharray:'',    lw:1.0 },
     planting:    { stroke:'#8fa852', fill:'rgba(143,168,82,0.18)',  dasharray:'3,2', lw:1.0 },
     groundcover: { stroke:'#a5c96e', fill:'rgba(165,201,110,0.20)', dasharray:'1,2', lw:0.8 },
@@ -2648,7 +2712,7 @@ function exportDXF() {
 // Colour helper for KANVAS export (returns raw hex values, no CSS vars)
 function SVG_CAT_COLOR(cat) {
   const MAP = {
-    boundary:    { stroke:'#c8a96e', fill:'rgba(200,169,110,0.06)' },
+    boundary:    { stroke:'#2a1a08', fill:'rgba(200,169,110,0.06)' },
     hardscape:   { stroke:'#b0956d', fill:'rgba(176,149,109,0.22)' },
     planting:    { stroke:'#8fa852', fill:'rgba(143,168,82,0.18)'  },
     groundcover: { stroke:'#a5c96e', fill:'rgba(165,201,110,0.20)' },
